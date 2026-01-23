@@ -1,0 +1,61 @@
+package com.github.oauth.controller;
+
+import com.github.oauth.user.User;
+import com.github.oauth.user.UserService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
+@Controller
+public class LocalAuthController {
+
+    private final UserService userService;
+    private final String jwtSecret = "very-secret-key";
+
+    public LocalAuthController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping("/login")
+    public String login(
+            @RequestParam String username,
+            @RequestParam String password,
+            HttpServletResponse response,
+            Model model
+    ) {
+        User user = userService.authenticate(username, password);
+        if (user == null) {
+            //throw new RuntimeException("用户名或密码错误");
+            model.addAttribute("msg", "用户名或密码错误");
+            return "index";
+        }
+
+        //String jwt = jwtUtil.generateToken(user.getUsername());
+        OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Shanghai"));
+        //OffsetDateTime expTime = now.plusSeconds(10*60);//10分钟
+        OffsetDateTime expTime = now.plusSeconds(2 * 60);//2分钟
+        // 3️⃣ 生成 JWT
+        String jwt = Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(expTime.toInstant()))
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .compact();
+
+        Cookie cookie = new Cookie("token", jwt);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return "redirect:/";
+    }
+}
