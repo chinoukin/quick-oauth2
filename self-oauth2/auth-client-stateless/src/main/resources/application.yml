@@ -1,0 +1,29 @@
+server:
+  port: 8083
+#  servlet:
+#    session:
+#      cookie:
+#        name: CLIENT_SESSION  # 避免session冲突
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          client-app:
+#            provider: custom-provider
+#            client-id: client-app
+#            client-secret: client-secret
+#            authorization-grant-type: authorization_code
+#            redirect-uri: http://localhost:8082/login/oauth2/code/client-app
+#            client-authentication-method: post
+#            scope: read,write
+#        provider:
+#          custom-provider:
+#            token-uri: http://localhost:8080/oauth/token
+#            authorization-uri: http://localhost:8080/oauth/authorize
+#            user-info-uri: http://localhost:8081/userinfo
+#            user-name-attribute: user_name
+
+logging:
+  level:
+    org.springframework.security: DEBUG

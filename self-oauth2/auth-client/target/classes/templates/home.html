@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h1>Welcome, <span th:text="${username}"></span>!</h1>
+
+<h2>Your Attributes:</h2>
+<ul>
+    <li th:each="attr : ${attributes}">
+        <strong th:text="${attr.key}"></strong>: <span th:text="${attr.value}"></span>
+    </li>
+</ul>
+
+<hr>
+<a th:href="@{/products}">View Products (Protected Resource)</a><br>
+<a th:href="@{/userinfo}">View User Info</a><br>
+<a th:href="@{/admin}" class="btn">管理面板</a>
+<a th:href="@{/logout}">Logout</a>
+</body>
+</html>
