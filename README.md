@@ -35,3 +35,8 @@ keytool -exportcert \
   -rfc \
   -file public-key.pem
 ```
+
+## resourceServer与auth-client同为一体
+同为一体时，可直接将auth-server授权给resourceServer的token返回给前端，存入cookie等  
+不再需要在client中配置一个jwtFilter用于将已认证的用户在SecurityContextHolder中设置为认证  
+client的security配置增加.and().oauth2ResourceServer().jwt();
