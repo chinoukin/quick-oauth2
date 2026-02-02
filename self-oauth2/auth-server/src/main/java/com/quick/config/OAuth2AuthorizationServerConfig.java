@@ -3,6 +3,7 @@ package com.quick.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
+
+import java.security.KeyPair;
 
 @Configuration
 @EnableAuthorizationServer
@@ -33,10 +37,29 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
         return new JwtTokenStore(jwtAccessTokenConverter());
     }
 
+    //对称加密jwt
+//    @Bean
+//    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+//        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+//        converter.setSigningKey("secret-key-12345");
+//        return converter;
+//    }
+
+    //非对称加密jwt
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey("secret-key-12345");
+        // 授权服务器：使用私钥进行签名
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(
+                new ClassPathResource("keystore.jks"),
+                "123456".toCharArray()
+        );
+
+        KeyPair keyPair = keyStoreKeyFactory.getKeyPair("jwt-key");
+        converter.setKeyPair(keyPair);  // 设置密钥对（包含私钥）
+
+        // 可选：提供公钥给资源服务器查询
+        // converter.setVerifierKey(getPublicKeyAsString(keyPair.getPublic()));
         return converter;
     }
 

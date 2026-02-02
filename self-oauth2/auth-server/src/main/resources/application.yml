@@ -15,6 +15,14 @@ spring:
       ddl-auto: update
     show-sql: true
 
+jwt:
+  # 授权服务器使用私钥
+  key-store:
+    location: classpath:keystore.jks
+    password: 123456
+    alias: auth-key
+    key-password: 123456
+
 logging:
   level:
     org.springframework.security: DEBUG

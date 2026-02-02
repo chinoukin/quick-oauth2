@@ -2,6 +2,8 @@ package com.quick.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -10,10 +12,32 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 @Configuration
 @EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
+    // （对称）yml中配置了，会自动创建tokenStore、jwtAccessTokenConverter
+//    @Override
+//    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+//        resources.tokenStore(tokenStore());
+//    }
+
+//    @Bean
+//    public TokenStore tokenStore() {
+//        return new JwtTokenStore(jwtAccessTokenConverter());
+//    }
+
+//    @Bean
+//    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+//        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+//        converter.setSigningKey("secret-key-12345");
+//        return converter;
+//    }
+
+    //非对称
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
         resources.tokenStore(tokenStore());
@@ -27,8 +51,17 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey("secret-key-12345");
+        converter.setVerifierKey(readPublicKey());
         return converter;
+    }
+
+    private String readPublicKey() {
+        try {
+            Resource resource = new ClassPathResource("public-key.pem");
+            return new String(Files.readAllBytes(resource.getFile().toPath()));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read public key", e);
+        }
     }
 
     @Override

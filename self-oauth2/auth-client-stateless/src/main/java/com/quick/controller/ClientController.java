@@ -39,7 +39,7 @@ public class ClientController {
 
     private final String clientId = "client-app";
     private final String clientSecret = "client-secret";
-    private final String jwtSecret = "very-secret-key";
+    private final String jwtSecret = "secret-key-12345";
     private final RestTemplate restTemplate = new RestTemplate();
 
     @GetMapping("/")
@@ -86,7 +86,9 @@ public class ClientController {
                 Map.class
         );
 
-        String accessToken = (String) resp.get("access_token");
+        String accessToken = (String) resp.get("access_token");//注意这个access_token只能是访问resourceServer的授权，这里client并不是resourceServer所以并不能用它来调用client中的接口，
+        // 实际可以把client和resourceServer合为一体,就可以把accessToken直接返回给前端
+
 
         // 2️⃣ access_token -> 用户信息
         HttpHeaders userHeaders = new HttpHeaders();
@@ -115,6 +117,7 @@ public class ClientController {
 
         // 4️⃣ 写 cookie 返回浏览器
         Cookie cookie = new Cookie("token", jwt);
+        //Cookie cookie = new Cookie("token", accessToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);

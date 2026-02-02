@@ -20,7 +20,7 @@ import java.util.Date;
 public class LocalAuthController {
 
     private final UserService userService;
-    private final String jwtSecret = "very-secret-key";
+    private final String jwtSecret = "secret-key-12345";
 
     public LocalAuthController(UserService userService) {
         this.userService = userService;
