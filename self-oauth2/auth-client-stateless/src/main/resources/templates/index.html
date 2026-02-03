@@ -33,6 +33,7 @@
 <div th:if="${username != null}">
     <p>已登录用户：<span th:text="${username}"></span></p>
     <a href="/api/logout">Logout</a>
+    <div th:if="${msg != null}"><p><span style="color:red" th:text="${msg}"></span></p></div>
 </div>
 
 </body>

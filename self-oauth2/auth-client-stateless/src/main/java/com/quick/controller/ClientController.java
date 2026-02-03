@@ -134,4 +134,24 @@ public class ClientController {
         response.addCookie(cookie);
         return "redirect:/";
     }
+
+    @GetMapping("/test")
+    public String test(@CookieValue(value = "token", required = false) String token, HttpServletRequest request, Model model) {
+        if (token == null) {
+            String header = request.getHeader("Authorization");
+            if (header != null && header.startsWith("Bearer ")) {
+                token = header.substring(7);
+            }
+        }
+        if (token != null) {
+            try {
+                Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+                model.addAttribute("username", claims.getSubject());
+                model.addAttribute("msg", "test success");
+            } catch (Exception e) {
+                // token 过期或无效
+            }
+        }
+        return "index";
+    }
 }
