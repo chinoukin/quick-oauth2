@@ -110,11 +110,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 方式3：从 "scope" 声明中提取
         if (claims.containsKey("scope")) {
-            String scope = claims.get("scope", String.class);
-            if (scope != null) {
-                String[] scopes = scope.split(" ");
-                for (String s : scopes) {
-                    authorities.add(new SimpleGrantedAuthority("SCOPE_" + s));
+            Object scopeObj = claims.get("scope");
+            if (scopeObj != null) {
+                if (scopeObj instanceof List) {
+                    for (Object scope : (List<?>) scopeObj) {
+                        String scopename = scope.toString();
+                        if (!scopename.startsWith("SCOPE_")) {
+                            scopename = "SCOPE_" + scopename;
+                        }
+                        authorities.add(new SimpleGrantedAuthority(scopename));
+                    }
                 }
             }
         }

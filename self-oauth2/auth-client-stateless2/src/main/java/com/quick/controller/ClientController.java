@@ -168,4 +168,29 @@ public class ClientController {
         }
         return "index";
     }
+
+    @GetMapping("/test2")
+    //@PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_read','SCOPE_write')")
+    public String test2(@CookieValue(value = "token", required = false) String token, HttpServletRequest request, Model model) {
+        if (token == null) {
+            String header = request.getHeader("Authorization");
+            if (header != null && header.startsWith("Bearer ")) {
+                token = header.substring(7);
+            }
+        }
+        if (token != null) {
+            try {
+                //Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+                // 使用与auth-server密钥对想对应的公钥即可
+                Claims claims = Jwts.parser().setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody();
+                model.addAttribute("username", claims.get("user_name"));
+                model.addAttribute("msg", "test success");
+            } catch (Exception e) {
+                // token 过期或无效
+            }
+        }
+        return "index";
+    }
 }
