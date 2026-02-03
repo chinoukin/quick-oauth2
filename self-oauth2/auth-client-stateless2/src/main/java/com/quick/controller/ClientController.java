@@ -2,8 +2,11 @@ package com.quick.controller;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import java.security.KeyPair;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -128,6 +132,74 @@ public class ClientController {
 
         // 4️⃣ 写 cookie 返回浏览器
         //Cookie cookie = new Cookie("token", jwt);
+        Cookie cookie = new Cookie("token", accessToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return "redirect:/";
+    }
+
+    // basic认证的方式
+    // auth-server应配置为自动批准 autoApprove(true)
+    @GetMapping("/login/self-oauth2-basic")
+    public String loginBasic(HttpServletResponse response) {
+        // GitHub OAuth 授权 URL
+        String url = "http://localhost:8080/oauth/authorize" +
+                "?response_type=code" +
+                "&client_id=" + clientId +
+                "&scope=read write" +
+                "&redirect_uri=http://localhost:8083/self-oauth2/callback";
+        String username="admin";
+        String password="admin";
+        String userAuth = username + ":" + password;
+        String encodedUserAuth = Base64.getEncoder().encodeToString(userAuth.getBytes());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Basic " + encodedUserAuth);
+
+        // 不自动重定向
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        HttpClient httpClient = HttpClientBuilder.create()
+                .disableRedirectHandling()
+                .build();
+        factory.setHttpClient(httpClient);
+        restTemplate.setRequestFactory(factory);
+
+        ResponseEntity<String> resp = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                String.class
+        );
+
+        // 从重定向URL中提取授权码
+        String code="";
+        String location = resp.getHeaders().getFirst("Location");
+        if (location != null && location.contains("code=")) {
+            code=location.split("code=")[1].split("&")[0];
+        }
+
+        headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("grant_type", "authorization_code");//必须要
+        params.add("code", code);
+        params.add("redirect_uri", "http://localhost:8083/self-oauth2/callback");//必须要
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        Map<String, Object> resp2 = restTemplate.postForObject(
+                "http://localhost:8080/oauth/token",
+                request,
+                Map.class
+        );
+
+        String accessToken = (String) resp2.get("access_token");
+
         Cookie cookie = new Cookie("token", accessToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");

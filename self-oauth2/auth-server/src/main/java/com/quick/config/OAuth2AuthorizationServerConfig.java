@@ -78,8 +78,10 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
                 .authorizedGrantTypes("password", "refresh_token", "authorization_code")
                 .scopes("read", "write")
                 .redirectUris("http://localhost:8082/login/oauth2/code/client-app"
-                    ,"http://localhost:8083/self-oauth2/callback")
-//                .autoApprove(true)
+                        ,"http://localhost:8083/self-oauth2/callback"
+                        ,"http://localhost:8083/self-oauth2/callbackBasic")
+                // baisc认证autoApprove应设置为true
+                .autoApprove(true)
                 .accessTokenValiditySeconds(3600)
                 .refreshTokenValiditySeconds(86400);
     }
