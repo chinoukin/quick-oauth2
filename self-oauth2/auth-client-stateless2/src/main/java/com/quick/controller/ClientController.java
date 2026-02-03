@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.KeyPair;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -149,7 +151,7 @@ public class ClientController {
                 "?response_type=code" +
                 "&client_id=" + clientId +
                 "&scope=read write" +
-                "&redirect_uri=http://localhost:8083/self-oauth2/callback";
+                "&redirect_uri=http://localhost:8083/self-oauth2/callbackBasic";
         String username="admin";
         String password="admin";
         String userAuth = username + ":" + password;
@@ -159,12 +161,12 @@ public class ClientController {
         headers.set("Authorization", "Basic " + encodedUserAuth);
 
         // 不自动重定向
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        HttpClient httpClient = HttpClientBuilder.create()
-                .disableRedirectHandling()
-                .build();
-        factory.setHttpClient(httpClient);
-        restTemplate.setRequestFactory(factory);
+//        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+//        HttpClient httpClient = HttpClientBuilder.create()
+//                .disableRedirectHandling()
+//                .build();
+//        factory.setHttpClient(httpClient);
+//        restTemplate.setRequestFactory(factory);
 
         ResponseEntity<String> resp = restTemplate.exchange(
                 url,
@@ -174,11 +176,14 @@ public class ClientController {
         );
 
         // 从重定向URL中提取授权码
-        String code="";
-        String location = resp.getHeaders().getFirst("Location");
-        if (location != null && location.contains("code=")) {
-            code=location.split("code=")[1].split("&")[0];
-        }
+//        String code="";
+//        String location = resp.getHeaders().getFirst("Location");
+//        if (location != null && location.contains("code=")) {
+//            code=location.split("code=")[1].split("&")[0];
+//        }
+
+        //restTemplate没有配置[不自动重定向]时，可以这么做
+        String code = resp.getBody();
 
         headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -188,7 +193,7 @@ public class ClientController {
         params.add("client_secret", clientSecret);
         params.add("grant_type", "authorization_code");//必须要
         params.add("code", code);
-        params.add("redirect_uri", "http://localhost:8083/self-oauth2/callback");//必须要
+        params.add("redirect_uri", "http://localhost:8083/self-oauth2/callbackBasic");//必须要
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
@@ -206,6 +211,15 @@ public class ClientController {
         response.addCookie(cookie);
 
         return "redirect:/";
+    }
+
+    //restTemplate没有配置[不自动重定向]时，可以这么做
+    @GetMapping("/self-oauth2/callbackBasic")
+    public void callbackBasic(@RequestParam String code, HttpServletResponse response) throws IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write(code);
+        }
     }
 
     @GetMapping("/api/logout")

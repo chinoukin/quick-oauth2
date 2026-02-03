@@ -40,7 +40,7 @@ public class BasicRestController {
                 "?response_type=code" +
                 "&client_id=" + clientId +
                 "&scope=read write" +
-                "&redirect_uri=http://localhost:8083/self-oauth2/callbackBasic";
+                "&redirect_uri=http://localhost:8083/self-oauth2/callbackBasic1111";
         String username="admin";
         String password="admin";
         String userAuth = username + ":" + password;
@@ -71,6 +71,9 @@ public class BasicRestController {
             code=location.split("code=")[1].split("&")[0];
         }
 
+        //restTemplate没有配置[不自动重定向]时，可以这么做
+        //String code = response.getBody();
+
         headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -79,7 +82,7 @@ public class BasicRestController {
         params.add("client_secret", clientSecret);
         params.add("grant_type", "authorization_code");//必须要
         params.add("code", code);
-        params.add("redirect_uri", "http://localhost:8083/self-oauth2/callbackBasic");//必须要
+        params.add("redirect_uri", "http://localhost:8083/self-oauth2/callbackBasic1111");//必须要
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
@@ -95,7 +98,8 @@ public class BasicRestController {
 
     }
 
-//    @GetMapping("/self-oauth2/callbackBasic")
+    //restTemplate没有配置[不自动重定向]时，可以这么做
+//    @GetMapping("/self-oauth2/callbackBasic1111")
 //    public String callback(@RequestParam String code, HttpServletResponse response) {
 //        return code;
 //    }
