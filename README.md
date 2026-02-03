@@ -36,7 +36,8 @@ keytool -exportcert \
   -file public-key.pem
 ```
 
-## resourceServer与auth-client同为一体
-同为一体时，可直接将auth-server授权给resourceServer的token返回给前端，存入cookie等  
-不再需要在client中配置一个jwtFilter用于将已认证的用户在SecurityContextHolder中设置为认证  
-client的security配置增加.and().oauth2ResourceServer().jwt();
+## 无状态auth-client
+1.auth-client-stateless  
+自定义jwt所使用的密钥(对称加密)并不是和auth-server相关的，生成的jwt只能用于auth-client-stateless服务。（第三方登录的token仅用于从resourceServer中获取用户信息，最终返回的都是自定义token）  
+2.auth-client-stateless2  
+自定义jwt所使用的密钥(非对称加密)和auth-server是同一个，生成的jwt能用于auth-resource和auth-client-stateless2服务。（第三方登录直接返回auth-server创建的token,本地登录返回自定义token）
