@@ -20,6 +20,7 @@
         <module>auth-resource</module>
         <module>auth-client</module>
         <module>auth-client-stateless</module>
+        <module>auth-client-stateless2</module>
     </modules>
 
     <properties>
