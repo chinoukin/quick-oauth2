@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.util.StreamUtils;
+
+import java.nio.charset.StandardCharsets;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,7 +61,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private String readPublicKey() {
         try {
             Resource resource = new ClassPathResource("public-key.pem");
-            return new String(Files.readAllBytes(resource.getFile().toPath()));
+            // 打成jar包后，File就会失败，需要用流才行，这里用spring提供的StreamUtils
+            //return new String(Files.readAllBytes(resource.getFile().toPath()));
+            return StreamUtils.copyToString(
+                    resource.getInputStream(),
+                    StandardCharsets.UTF_8
+            );
         } catch (IOException e) {
             throw new RuntimeException("Failed to read public key", e);
         }
