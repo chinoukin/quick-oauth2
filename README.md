@@ -68,13 +68,13 @@ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xmx256m"
 mvn clean install
 cd self-oauth2/auth-server
 mvn clean package
-nohup java -Xmx256m -jar auth-server-1.0.0.jar > auth-server.log 2>&1 &
+nohup java -Xmx256m -jar target/auth-server-1.0.0.jar > auth-server.log 2>&1 &
 
 cd ../auth-resource
 mvn clean package
-java -Xmx256m -jar auth-resource-1.0.0.jar > auth-resource.log 2>&1 &
+java -Xmx256m -jar target/auth-resource-1.0.0.jar > auth-resource.log 2>&1 &
 
 cd ../auth-client-stateless2
 mvn clean package
-java -Xmx256m -jar auth-client-stateless2-1.0.0.jar  > auth-client-stateless2.log 2>&1 &
+java -Xmx256m -jar target/auth-client-stateless2-1.0.0.jar  > auth-client-stateless2.log 2>&1 &
 ```
