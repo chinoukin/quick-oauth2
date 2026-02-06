@@ -72,9 +72,21 @@ nohup java -Xmx256m -jar target/auth-server-1.0.0.jar > auth-server.log 2>&1 &
 
 cd ../auth-resource
 mvn clean package
-java -Xmx256m -jar target/auth-resource-1.0.0.jar > auth-resource.log 2>&1 &
+nohup java -Xmx256m -jar target/auth-resource-1.0.0.jar > auth-resource.log 2>&1 &
 
 cd ../auth-client-stateless2
 mvn clean package
-java -Xmx256m -jar target/auth-client-stateless2-1.0.0.jar  > auth-client-stateless2.log 2>&1 &
+nohup java -Xmx256m -jar target/auth-client-stateless2-1.0.0.jar  > auth-client-stateless2.log 2>&1 &
+```
+
+## self-oauth后台快速启动2（不切换目录）
+```
+mvn clean install
+mvn clean package -f self-oauth2/auth-server/pom.xml
+mvn clean package -f self-oauth2/auth-resource/pom.xml
+mvn clean package -f self-oauth2/auth-client-stateless2/pom.xml
+
+nohup java -Xmx256m -jar self-oauth2/auth-server/target/auth-server-1.0.0.jar > auth-server.log 2>&1 &
+nohup java -Xmx256m -jar self-oauth2/auth-resource/target/auth-resource-1.0.0.jar > auth-resource.log 2>&1 &
+nohup java -Xmx256m -jar self-oauth2/auth-client-stateless2/target/auth-client-stateless2-1.0.0.jar  > auth-client-stateless2.log 2>&1 &
 ```
